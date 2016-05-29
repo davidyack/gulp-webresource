@@ -1,4 +1,4 @@
 function HandleOnLoad()
 {
-    alert('onload called 11')
+    alert('onload called 24')
 }

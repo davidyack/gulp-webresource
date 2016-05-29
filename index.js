@@ -4,6 +4,7 @@ var fs = require('fs')
 var through = require('through2')
 var path = require('path')
 var CRMWebAPI = require('./CRMWebAPI');
+var adal = require('adal-node');
 
 
 var CRMWebResourceManager = (function () {
@@ -12,6 +13,36 @@ function CRMWebResourceManager() {
 		return this;
 	}
 });
+
+CRMWebResourceManager._Authenticate = function(config)
+{
+  return new Promise(function (resolve, reject) {
+    
+    var   authorityHostUrl = 'https://login.windows.net/common';
+    var  clientId = '3e4ef8f4-24ba-4709-a60d-27ee21fdfba9';
+  
+    if (config.AccessToken != null)
+    {
+        resolve(config.AccessToken);
+    }
+    else
+    {
+        var context = new  adal.AuthenticationContext(authorityHostUrl);
+        
+        context.acquireTokenWithUsernamePassword(config.Server, config.User, config.Password, clientId, function(err, tokenResponse) {
+        if (err) {
+            console.log('authentication failed: ' + err.stack);
+            reject(err);
+        } else {
+   
+            resolve(tokenResponse.accessToken);
+        }
+        });
+    }
+  });
+  
+}
+
 CRMWebResourceManager.Upload = function (config) {
 		
         return through.obj(function(file, enc, cb) {
@@ -31,7 +62,9 @@ CRMWebResourceManager.Upload = function (config) {
             	Filter:"name  eq '"+ uniqueName +"'",
 	            Select:['webresourceid'],   
             };
-            var apiconfig = { APIUrl: config.Server, AccessToken: config.AccessToken };
+            CRMWebResourceManager._Authenticate(config).then(function(accessToken){
+                
+            var apiconfig = { APIUrl: config.Server + '/api/data/v8.0/', AccessToken: accessToken };
 
             var crmAPI = new CRMWebAPI(apiconfig);
             
@@ -46,7 +79,8 @@ CRMWebResourceManager.Upload = function (config) {
                     wrUpdate.content = new Buffer(wrContent).toString('base64');
                     crmAPI.Update("webresourceset",wrUpdate.webresourceid,wrUpdate).then(function(){
                        console.log(uniqueName + " updated.")
-                       var publishParms = {ParameterXml:"<importexportxml><webresources><webresource>{" + wrUpdate.webresourceid + "}</webresource></webresources></importexportxml>"}
+                       var publishParms = {ParameterXml:"<importexportxml><webresources><webresource>{" + 
+                                        wrUpdate.webresourceid + "}</webresource></webresources></importexportxml>"}
                       
                        crmAPI.ExecuteAction("PublishXml",publishParms).then(
                           function(){ 
@@ -72,7 +106,8 @@ CRMWebResourceManager.Upload = function (config) {
             ,function(error)
             {	console.log(error);
             });
-          
+          });
+
           
         });
     

@@ -18,5 +18,8 @@
   "homepage": "https://github.com/davidyack/gulp-webresource#readme",
   "devDependencies": {
     "gulp": "^3.9.1"
+  },
+  "dependencies": {
+      "adal-node": ">= 0.1.3"
   }
 }
