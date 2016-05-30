@@ -11,3 +11,59 @@ For authentication the gulp task just wants a CRM OAuth access token, it doesn't
 When used in combination with watch and a cache task - you can configure the gulpfile to watch for changes in web resources and only upload those that have changed.  Look at the gulp file in ./tests for an example
 
 This is in preview -so all feedback is welcome!
+
+####To use install via npm
+````
+npm install gulp-webresource --save-dev
+````
+####Step By Step
+1) create a new folder for your project
+2) install gulp, gulp-cached and gulp-webresource
+````
+npm install gulp --save-dev
+npm install gulp-cached --save-dev
+npm install gulp-webresource --save-dev
+````
+3) create a gulfile.js with the following contents
+````
+var webresource = require('gulp-webresource')
+var gulp = require('gulp')
+var cache = require('gulp-cached');
+
+var config = {
+    Server:process.env.crmserver,
+    User:process.env.crmuser,
+    Password:process.env.crmpassword,
+    Accesstoken:null,
+    WebResources:[
+     { Path:'TestWebResource\\TestWebResource1.js',UniqueName:'ctc_TestWebResource1.js' },
+     { Path:'TestWebResource\\TestWebResource2.js',UniqueName:'ctc_TestWebResource2.js' },
+    ]
+}
+
+gulp.task('cachecurrent', function(){
+    gulp.src('./**/*.js')
+    .pipe(cache('uploadwr'))
+});
+
+gulp.task('upload', function(){
+    gulp.src('./**/*.js')
+    .pipe(cache('uploadwr'))
+    .pipe(webresource.Upload(config));
+});
+
+gulp.task('watch', function() {
+    gulp.watch('./**/*.js', ['upload']);
+});
+
+gulp.task('default', ['cachecurrent','watch']);
+
+````
+4) customize gulpfile.js WebResources list to include your web resources
+5) Set environment variables for crmserver,crmuser,crmpassword
+````
+set crmserver=https://orgname.crm.dynamics.com
+set crmuser=useremail
+set crmpassword=userpwd
+````
+6) Run gulp, and then go change a file and watch it upload it
