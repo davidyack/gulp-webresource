@@ -6,7 +6,7 @@ Currently there is support for upload and publish, this can be used to automate 
 
 The gulp task takes configuration information that provides mapping from file to CRM web resoure.  
 
-For authentication the gulp task just wants a CRM OAuth access token, it doesn't care how you got it.  So you can use https://xrm.tools/Accesstoken to get it, or use adal.js to do it from within your gulp flow 
+For authentication the gulp task can use either user/password or an access token, it doesn't care how you got it.  So you can use https://xrm.tools/Accesstoken to get it, or use adal.js to do it from within your gulp flow, or if you use the example below we take care of the calls to get the AccessToken  
 
 When used in combination with watch and a cache task - you can configure the gulpfile to watch for changes in web resources and only upload those that have changed.  Look at the gulp file in ./tests for an example
 
@@ -66,4 +66,8 @@ set crmserver=https://orgname.crm.dynamics.com
 set crmuser=useremail
 set crmpassword=userpwd
 ````
-6) Run gulp, and then go change a file and watch it upload it
+6) Administrator must consent to allowing the task to talk to CRM - navigate to the following link, this will prompt for administrator login and then will ask it to agree to allow gulp-webresource to talk to your CRM
+````
+ http://bit.ly/1Vpj6O2
+````
+7) Run gulp, and then go change a file and watch it upload it
