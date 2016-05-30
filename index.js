@@ -27,17 +27,23 @@ CRMWebResourceManager._Authenticate = function(config)
     }
     else
     {
-        var context = new  adal.AuthenticationContext(authorityHostUrl);
-        
-        context.acquireTokenWithUsernamePassword(config.Server, config.User, config.Password, clientId, function(err, tokenResponse) {
-        if (err) {
-            console.log('authentication failed: ' + err.stack);
-            reject(err);
-        } else {
-   
-            resolve(tokenResponse.accessToken);
+        if ((config.Server == null) || (config.User == null) || (config.Password == null))
+        {
+            reject("You must provide Server, User and Password if not providing a valid AccessToken");
         }
+        else
+        {
+            var context = new  adal.AuthenticationContext(authorityHostUrl);
+            
+            context.acquireTokenWithUsernamePassword(config.Server, config.User, config.Password, clientId, function(err, tokenResponse) {
+            if (err) {
+                reject(err);
+            } else {
+    
+                resolve(tokenResponse.accessToken);
+            }
         });
+        }
     }
   });
   
@@ -50,12 +56,12 @@ CRMWebResourceManager.Upload = function (config) {
            var uniqueName = null;
            config.WebResources.forEach(function(wrconfig) {
               
-               if (wrconfig.Path == path.relative(__dirname,file.path))
+               if (wrconfig.Path == path.relative(__dirname.replace('node_modules\\gulp-webresource',''),file.path))
                  uniqueName = wrconfig.UniqueName;
            })
            if (uniqueName == null)
            {
-               console.log('File Skiped - Not Configured : ' + path.relative(__dirname,file.path) );
+               console.log('File Skiped - Not Configured : ' + path.relative(__dirname.replace('node_modules\\gulp-webresource',''),file.path) );
                return cb();
            }
            var queryOption = {
@@ -106,6 +112,14 @@ CRMWebResourceManager.Upload = function (config) {
             ,function(error)
             {	console.log(error);
             });
+          },function(error)
+          { 
+              if (error.stack.indexOf('administrator has not consented') != -1)
+                { 
+                        console.log('administrator must visit http://bit.ly/1Vpj6O2 to consent to use first');	
+                }
+                else
+                console.log(error)
           });
 
           
