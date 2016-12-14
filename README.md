@@ -34,7 +34,7 @@ var config = {
     Server:process.env.crmserver,
     User:process.env.crmuser,
     Password:process.env.crmpassword,
-    Accesstoken:null,
+    AccessToken:null,
     WebResources:[
      { Path:'TestWebResource\\TestWebResource1.js',UniqueName:'ctc_TestWebResource1.js' },
      { Path:'TestWebResource\\TestWebResource2.js',UniqueName:'ctc_TestWebResource2.js' },
