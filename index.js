@@ -61,7 +61,7 @@ CRMWebResourceManager.Upload = function (config) {
            })
            if (uniqueName == null)
            {
-               console.log('File Skiped - Not Configured : ' + path.relative(__dirname.replace('node_modules\\gulp-webresource',''),file.path) );
+               console.log('File Skipped - Not Configured : ' + path.relative(__dirname.replace('node_modules\\gulp-webresource',''),file.path) );
                return cb();
            }
            var queryOption = {
