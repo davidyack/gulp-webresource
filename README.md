@@ -16,15 +16,18 @@ This is in preview -so all feedback is welcome!
 ````
 npm install gulp-webresource --save-dev
 ````
+
 ####Step By Step
-1) create a new folder for your project
-2) install gulp, gulp-cached and gulp-webresource
+1) Create a new folder for your project
+
+2) Install gulp, gulp-cached and gulp-webresource
 ````
 npm install gulp --save-dev
 npm install gulp-cached --save-dev
 npm install gulp-webresource --save-dev
 ````
-3) create a gulfile.js with the following contents
+
+3) Create a gulfile.js with the following contents
 ````
 var webresource = require('gulp-webresource')
 var gulp = require('gulp')
@@ -59,15 +62,19 @@ gulp.task('watch', function() {
 gulp.task('default', ['cachecurrent','watch']);
 
 ````
-4) customize gulpfile.js WebResources list to include your web resources
+
+4) Customize gulpfile.js WebResources list to include your web resources
+
 5) Set environment variables for crmserver,crmuser,crmpassword
 ````
 set crmserver=https://orgname.crm.dynamics.com
 set crmuser=useremail
 set crmpassword=userpwd
 ````
+
 6) Administrator must consent to allowing the task to talk to CRM - navigate to the following link, this will prompt for administrator login and then will ask it to agree to allow gulp-webresource to talk to your CRM
 ````
  http://bit.ly/1Vpj6O2
 ````
+
 7) Run gulp, and then go change a file and watch it upload it
