@@ -72,7 +72,10 @@ CRMWebResourceManager.Upload = function (config) {
             };
             CRMWebResourceManager._Authenticate(config).then(function(accessToken){
                 
-            var apiconfig = { APIUrl: config.Server + '/api/data/v8.0/', AccessToken: accessToken };
+            var apiconfig = {
+              APIUrl: config.Server + '/api/data/v' + (config.ApiVersion || '8.0') + '/',
+              AccessToken: accessToken
+            };
 
             var crmAPI = new CRMWebAPI(apiconfig);
             
