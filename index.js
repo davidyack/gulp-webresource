@@ -40,7 +40,7 @@ function getWebResourceType(type) {
 
 CRMWebResourceManager._Authenticate = function(config) {
   return new Promise(function (resolve, reject) {
-    var authorityHostUrl = config.AuthorityHost || 'https://login.windows.net/common';
+    var authorityHostUrl = 'https://login.windows.net/' + ( config.Tenant || 'common');
     var clientId = config.ClientID || '3e4ef8f4-24ba-4709-a60d-27ee21fdfba9';
   
     if (config.AccessToken != null) {

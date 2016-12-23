@@ -80,3 +80,26 @@ set crmpassword=userpwd
 ````
 
 7) Run gulp, and then go change a file and watch it upload it
+#### Example of config if you are using Server to Server authentication
+````
+var config = {
+    Server:process.env.crmserver,
+    Tenant:'<name>.onmicrosoft.com',
+    ClientID:'<clientid>',
+    ClientSecret:'<clientsecret>',
+    AccessToken:null,
+    WebResources:[
+     { Path:'calc\\calc.js',UniqueName:'dave_calc.js', DisplayName:'Calc.js file', Type:'JavaScript' }
+    ]
+}
+````
+#### Permissions if you are using Server to Server authenticationread, write entity
+In order to Update 
+-read,write web resource
+In order to Publish 
+- read, write field
+- read, write relationship
+- read, write customizations
+- read ,write view
+- publish
+
