@@ -1,4 +1,4 @@
-# gulp-webresource
+# gulp-webresource for Dynamics 365
 
 This is designed to be used as a gulp task for working with Dynamics 365 web resources.
 
