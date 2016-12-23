@@ -15,26 +15,26 @@ function getWebResourceType(type) {
   switch (type) {
     case 'HTML':
       return 1;
-		case 'CSS':
-			return 2;
-		case 'JavaScript':
-			return 3;
-		case 'XML':
-			return 4;
-		case 'PNG':
-			return 5;
-		case 'JPG':
-			return 6;
-		case 'GIF':
-			return 7;
-		case 'XAP':
-			return 8;
-		case 'XSL':
-			return 9;
-		case 'ICO':
-			return 10;
-		default:
-			return null;
+    case 'CSS':
+      return 2;
+    case 'JavaScript':
+      return 3;
+    case 'XML':
+      return 4;
+    case 'PNG':
+      return 5;
+    case 'JPG':
+      return 6;
+    case 'GIF':
+      return 7;
+    case 'XAP':
+      return 8;
+    case 'XSL':
+      return 9;
+    case 'ICO':
+      return 10;
+    default:
+      return null;
   }
 }
 
@@ -78,23 +78,23 @@ CRMWebResourceManager.Upload = function (config, register) {
   }
 
   return through.obj(function(file, enc, cb) {
-		var normalizedPath = path.relative(__dirname.replace(
-			path.join('node_modules', 'gulp-webresource'), ''),file.path);
+    var normalizedPath = path.relative(__dirname.replace(
+      path.join('node_modules', 'gulp-webresource'), ''),file.path);
     var wrconfig = null;
-		config.WebResources.forEach(function(wrc) {
-		  if (wrc.Path == normalizedPath)
+    config.WebResources.forEach(function(wrc) {
+      if (wrc.Path == normalizedPath)
         wrconfig = wrc;
-		});
-		if (wrconfig == null) {
-		 console.log('File Skipped - Not Configured : ' + normalizedPath);
-		 return cb();
-		}
-		var queryOption = {
-		 Filter: "name  eq '" + wrconfig.UniqueName + "'",
-		 Select: [ 'webresourceid' ],   
-		};
+    });
+    if (wrconfig == null) {
+     console.log('File Skipped - Not Configured : ' + normalizedPath);
+     return cb();
+    }
+    var queryOption = {
+     Filter: "name  eq '" + wrconfig.UniqueName + "'",
+     Select: [ 'webresourceid' ],   
+    };
 
-		CRMWebResourceManager._Authenticate(config).then(function(accessToken) {
+    CRMWebResourceManager._Authenticate(config).then(function(accessToken) {
       var apiconfig = {
         APIUrl: config.Server + '/api/data/v' + (config.ApiVersion || '8.0') + '/',
         AccessToken: accessToken
@@ -146,10 +146,10 @@ CRMWebResourceManager.Upload = function (config, register) {
       }, console.log);
     }, function(error) { 
       if (error.stack && error.stack.indexOf('administrator has not consented') != -1)
-        console.log('administrator must visit http://bit.ly/1Vpj6O2 to consent to use first');	
+        console.log('administrator must visit http://bit.ly/1Vpj6O2 to consent to use first');  
       else
         console.log(error);
-		});
+    });
   });
 }
 
