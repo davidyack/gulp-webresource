@@ -2,7 +2,7 @@
 var fs = require('fs')
 var through = require('through2')
 var path = require('path')
-var CRMWebAPI = require('./CRMWebAPI');
+var CRMWebAPI = require('CRMWebAPI');
 var adal = require('adal-node');
 
 var CRMWebResourceManager = (function() {
