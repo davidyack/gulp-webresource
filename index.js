@@ -17,9 +17,8 @@ function CRMWebResourceManager() {
 CRMWebResourceManager._Authenticate = function(config)
 {
   return new Promise(function (resolve, reject) {
-    
-    var   authorityHostUrl = 'https://login.windows.net/common';
-    var  clientId = '3e4ef8f4-24ba-4709-a60d-27ee21fdfba9';
+    var authorityHostUrl = config.AuthorityHost || 'https://login.windows.net/common';
+    var clientId = '3e4ef8f4-24ba-4709-a60d-27ee21fdfba9';
   
     if (config.AccessToken != null)
     {
@@ -27,26 +26,31 @@ CRMWebResourceManager._Authenticate = function(config)
     }
     else
     {
-        if ((config.Server == null) || (config.User == null) || (config.Password == null))
-        {
-            reject("You must provide Server, User and Password if not providing a valid AccessToken");
-        }
+				if (!config.Server) {
+					reject("You must specify the CRM server");
+				}
+				var valid = (config.User && config.Password)
+					|| (config.ClientID && config.ClientSecret);
+        if (!valid)
+            reject("You must provide User & Password or ClientID & ClientSecret if not providing a valid AccessToken");
         else
         {
-            var context = new  adal.AuthenticationContext(authorityHostUrl);
-            
-            context.acquireTokenWithUsernamePassword(config.Server, config.User, config.Password, clientId, function(err, tokenResponse) {
-            if (err) {
-                reject(err);
-            } else {
-    
-                resolve(tokenResponse.accessToken);
-            }
-        });
+						function handleToken(err, tokenResponse) {
+							if (err) {
+									reject(err);
+							} else {
+									resolve(tokenResponse.accessToken);
+							}
+						};
+            var context = new adal.AuthenticationContext(authorityHostUrl);
+					  if (config.ClientID && config.ClientSecret) {
+							context.acquireTokenWithClientCredentials(config.Server, config.ClientID, config.ClientSecret, handleToken);
+						} else {
+							context.acquireTokenWithUsernamePassword(config.Server, config.User, config.Password, clientId, handleToken);
+						}
         }
     }
   });
-  
 }
 
 CRMWebResourceManager.Upload = function (config) {
@@ -119,6 +123,7 @@ CRMWebResourceManager.Upload = function (config) {
             });
           },function(error)
           { 
+						console.log(error);
               if (error.stack.indexOf('administrator has not consented') != -1)
                 { 
                         console.log('administrator must visit http://bit.ly/1Vpj6O2 to consent to use first');	
