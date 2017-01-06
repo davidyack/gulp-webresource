@@ -42,7 +42,7 @@ CRMWebResourceManager._Authenticate = function(config) {
   return new Promise(function (resolve, reject) {
     var authorityHostUrl = 'https://login.windows.net/' + ( config.Tenant || 'common');
     var clientId = config.ClientID || '3e4ef8f4-24ba-4709-a60d-27ee21fdfba9';
-  
+    
     if (config.AccessToken != null) {
         resolve(config.AccessToken);
     } else {
@@ -76,12 +76,12 @@ CRMWebResourceManager.Upload = function (config, register) {
   if (typeof register === 'undefined') {
     register = false;
   }
-
-  return through.obj(function(file, enc, cb) {
+  
+  return through.obj(function(file, enc, cb) {    
 		var normalizedPath = path.relative(__dirname.replace(
 			path.join('node_modules', 'gulp-webresource'), ''),file.path);
-    var wrconfig = null;
-		config.WebResources.forEach(function(wrc) {
+    var wrconfig = null;  
+		config.WebResources.forEach(function(wrc) {      
 		  if (wrc.Path == normalizedPath)
         wrconfig = wrc;
 		});
@@ -98,7 +98,7 @@ CRMWebResourceManager.Upload = function (config, register) {
       var apiconfig = {
         APIUrl: config.Server + '/api/data/v' + (config.ApiVersion || '8.0') + '/',
         AccessToken: accessToken
-      };
+      };      
       var crmAPI = new CRMWebAPI(apiconfig);
 
       crmAPI.GetList('webresourceset', queryOption).then(function(queryResult) {
@@ -106,7 +106,7 @@ CRMWebResourceManager.Upload = function (config, register) {
         var wrUpdate = {};
         wrUpdate.content = new Buffer(wrContent).toString('base64');
 
-        function internalcb(id) {
+        function publishcb(id) {
          console.log(wrconfig.UniqueName + (id ? " created." : " updated."));
          id = id || wrUpdate.webresourceid;
          var publishParms = {
@@ -123,10 +123,36 @@ CRMWebResourceManager.Upload = function (config, register) {
          });
         }
 
+        function addtosolutioncb(id) {
+          console.log("Added " + wrconfig.UniqueName +" to CRM with ID " + id);
+         if (wrconfig.Solution != null)
+         {
+         var addtoSolutionParams = { 
+              'ComponentId':id ,
+              'ComponentType':61,
+              'SolutionUniqueName':wrconfig.Solution,  
+              'AddRequiredComponents':false,
+              'IncludedComponentSettingsValues':null
+          };
+          crmAPI.ExecuteAction('AddSolutionComponent',addtoSolutionParams).then(function(results)
+                  {
+                    console.log("Added " + wrconfig.UniqueName +" to Solution");
+                  },
+                  function(error)
+                  {
+                    console.log("Error adding to solution " + wrconfig.UniqueName +" Error:", error);
+                    return cb();
+                  });
+         }
+         else{
+           console.log("Web resource "+ wrconfig.UniqueName + " created, but not added to solution");
+           return cb();}
+        }
+
         if (queryResult.List.length > 0) {
          wrUpdate.webresourceid = queryResult.List[0].webresourceid;
          crmAPI.Update("webresourceset", wrUpdate.webresourceid, wrUpdate)
-           .then(function() { internalcb(); }, function(error) {
+           .then(function() { publishcb(); }, function(error) {
              console.log("error updating " + wrconfig.UniqueName + "Error ", error);
              return cb();
            });
@@ -135,12 +161,12 @@ CRMWebResourceManager.Upload = function (config, register) {
           wrUpdate.name = wrconfig.UniqueName;
           wrUpdate.displayname = wrconfig.DisplayName || wrconfig.UniqueName;
          crmAPI.Create("webresourceset", wrUpdate)
-           .then(internalcb, function(error) {
-             console.log("error updating " + wrconfig.UniqueName + "Error ", error);
+           .then(addtosolutioncb, function(error) {
+             console.log("error creating " + wrconfig.UniqueName + "Error ", error);
              return cb();
            });
         } else {
-         console.log(wrconfig.UniqueName + " does not exist, refusing to register");
+         console.log(wrconfig.UniqueName + " does not exist skipping, and update not called with option register:true");
          return cb();
         }
       }, console.log);
