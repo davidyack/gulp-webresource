@@ -65,6 +65,24 @@ gulp.task('default', ['cachecurrent','watch']);
 
 ````
 
+#### For On Premise CRM Deployments: 
+Set the `config` var something like this to use NTLM authentication:
+```
+var config = {
+    Server:process.env.crmserver,
+    User:process.env.crmuser,
+    Password:process.env.crmpassword,
+    NTLM: {
+      Domain: 'YOURDOMAIN',
+      Workstation: process.env.COMPUTERNAME
+    },
+    WebResources:[
+      // ... etc.
+}
+
+
+```
+
 4) Customize gulpfile.js WebResources list to include your web resources
 
 5) Set environment variables for crmserver,crmuser,crmpassword

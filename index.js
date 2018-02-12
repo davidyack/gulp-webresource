@@ -2,7 +2,7 @@
 var fs = require('fs')
 var through = require('through2')
 var path = require('path')
-var CRMWebAPI = require('CRMWebAPI');
+var CRMWebAPI = require('crmwebapi-ntlm');
 var adal = require('adal-node');
 
 var CRMWebResourceManager = (function() {
@@ -77,7 +77,7 @@ CRMWebResourceManager.Upload = function (config, register) {
     register = false;
   }
   
-  return through.obj(function(file, enc, cb) {    
+  return through.obj(function (file, enc, cb) {
 		var normalizedPath = path.relative(__dirname.replace(
 			path.join('node_modules', 'gulp-webresource'), ''),file.path);
     var wrconfig = null;  
@@ -94,18 +94,49 @@ CRMWebResourceManager.Upload = function (config, register) {
 		 Select: [ 'webresourceid' ],   
 		};
 
-		CRMWebResourceManager._Authenticate(config).then(function(accessToken) {
+    if (!config.NTLM) {
+      CRMWebResourceManager._Authenticate(config)
+        .then(function (accessToken) {_UploadFiles(accessToken)}, function (error) {
+        if (error.stack && error.stack.indexOf('administrator has not consented') != -1)
+          console.log('administrator must visit http://bit.ly/1Vpj6O2 to consent to use first');
+        else
+          console.log(error);
+      });
+    } else { 
+      _UploadFiles();
+    }
+    function _UploadFiles (accessToken) {
       var apiconfig = {
         APIUrl: config.Server + '/api/data/v' + (config.ApiVersion || '8.0') + '/',
-        AccessToken: accessToken
       };      
+      if (accessToken) {
+        apiconfig.AccessToken = accessToken;
+      } else {
+        if (!config.NTLM) { 
+          throw new Error('You must set the NTLM options on the config option to connect to On Premise')
+        }
+        if (!['Domain', 'Workstation']
+          .every(function (x) { return !!config.NTLM[x] })
+          ) { 
+            throw new Error('You must include a username')
+        } else { 
+          Object.assign(apiconfig, {
+            ntlm: {
+              username: config.User,
+              password: config.Password,
+              domain: config.NTLM.Domain,
+              workstation: config.NTLM.Workstation
+            },
+          })
+        }
+      }
       var crmAPI = new CRMWebAPI(apiconfig);
-
+    
       crmAPI.GetList('webresourceset', queryOption).then(function(queryResult) {
         var wrContent = file.contents.toString();
         var wrUpdate = {};
         wrUpdate.content = new Buffer(wrContent).toString('base64');
-
+    
         function publishcb(id) {
          console.log(wrconfig.UniqueName + (id ? " created." : " updated."));
          id = id || wrUpdate.webresourceid;
@@ -122,7 +153,7 @@ CRMWebResourceManager.Upload = function (config, register) {
            return cb();
          });
         }
-
+    
         function addtosolutioncb(id) {
           console.log("Added " + wrconfig.UniqueName +" to CRM with ID " + id);
          if (wrconfig.Solution != null)
@@ -148,7 +179,7 @@ CRMWebResourceManager.Upload = function (config, register) {
            console.log("Web resource "+ wrconfig.UniqueName + " created, but not added to solution");
            return cb();}
         }
-
+    
         if (queryResult.List.length > 0) {
          wrUpdate.webresourceid = queryResult.List[0].webresourceid;
          crmAPI.Update("webresourceset", wrUpdate.webresourceid, wrUpdate)
@@ -170,12 +201,7 @@ CRMWebResourceManager.Upload = function (config, register) {
          return cb();
         }
       }, console.log);
-    }, function(error) { 
-      if (error.stack && error.stack.indexOf('administrator has not consented') != -1)
-        console.log('administrator must visit http://bit.ly/1Vpj6O2 to consent to use first');	
-      else
-        console.log(error);
-		});
+    }
   });
 }
 
