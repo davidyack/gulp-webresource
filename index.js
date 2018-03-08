@@ -167,7 +167,8 @@ CRMWebResourceManager.Upload = function (config, register) {
           };
           crmAPI.ExecuteAction('AddSolutionComponent',addtoSolutionParams).then(function(results)
                   {
-                    console.log("Added " + wrconfig.UniqueName +" to Solution");
+                    console.log("Added " + wrconfig.UniqueName + " to Solution");
+                    return cb();
                   },
                   function(error)
                   {
@@ -191,7 +192,7 @@ CRMWebResourceManager.Upload = function (config, register) {
           wrUpdate.webresourcetype = getWebResourceType(wrconfig.Type);
           wrUpdate.name = wrconfig.UniqueName;
           wrUpdate.displayname = wrconfig.DisplayName || wrconfig.UniqueName;
-         crmAPI.Create("webresourceset", wrUpdate)
+          crmAPI.Create("webresourceset", wrUpdate)
            .then(addtosolutioncb, function(error) {
              console.log("error creating " + wrconfig.UniqueName + "Error ", error);
              return cb();
