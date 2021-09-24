@@ -33,6 +33,10 @@ function getWebResourceType(type) {
 			return 9;
 		case 'ICO':
 			return 10;
+		case 'SVG':
+			return 11;
+		case 'RESX':
+			return 12;
 		default:
 			return null;
   }
